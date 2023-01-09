@@ -3,21 +3,16 @@ Notify.init({ cssAnimationStyle: 'from-top', fontAwesomeIconStyle: 'shadow' });
 
 const refs = {
   form: document.querySelector('.form'),
-  firstDelay: document.querySelector('input[name = "delay"]'),
-  step: document.querySelector('input[name = "step"]'),
-  amount: document.querySelector('input[name = "amount"]'),
 };
 
 refs.form.addEventListener('submit', onFormSubmit);
 
 function onFormSubmit(evt) {
   evt.preventDefault();
-  const firstDelay = Number(refs.firstDelay.value);
-  const step = Number(refs.step.value);
-  const amount = Number(refs.amount.value);
+  const { delay, step, amount } = evt.target.elements;
 
-  for (let i = 1; i <= amount; i += 1) {
-    const delayStep = firstDelay + step * (i - 1);
+  for (let i = 1; i <= +amount.value; i += 1) {
+    const delayStep = +delay.value + +step.value * (i - 1);
     createPromise(i, delayStep).then(onSuccess).catch(onError);
   }
 }

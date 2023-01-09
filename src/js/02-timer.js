@@ -1,7 +1,7 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-let input = document.querySelector('#datetime-picker');
+const input = document.querySelector('#datetime-picker');
 const startBtn = document.querySelector('button[data-start]');
 const days = document.querySelector('span[data-days]');
 const hours = document.querySelector('span[data-hours]');
@@ -9,6 +9,7 @@ const minutes = document.querySelector('span[data-minutes]');
 const seconds = document.querySelector('span[data-seconds]');
 
 startBtn.setAttribute('disabled', 'disabled');
+
 function convertMs(ms) {
   // Number of milliseconds per unit of time
   const second = 1000;
@@ -29,39 +30,52 @@ function convertMs(ms) {
 }
 
 function addLeadingZero(value) {
-  value = String(value).padStart(2, ['0']);
-  return value;
+  return String(value).padStart(2, ['0']);
 }
 
 const options = {
   enableTime: true,
   time_24hr: true,
-  defaultDate: new Date(),
+  defaultDate: Date.now(),
   minuteIncrement: 1,
-  onClose(selectedDates) {
-    const data = options.defaultDate;
-    if (selectedDates[0].getTime() < data.getTime()) {
-      window.alert('Please choose a date in the future');
-    } else {
-      startBtn.removeAttribute('disabled', 'disabled');
-    }
+  onClose([selectedDates]) {
+    validateDatetime(selectedDates, options);
     startBtn.addEventListener('click', () => {
-      let difference = selectedDates[0].getTime() - data.getTime();
-      if (difference <= 0) {
-        clearInterval(timerId);
-      }
-      const time = setTimeout(() => {
+      let difference = selectedDates.getTime() - options.defaultDate;
+
+      setTimeout(() => {
         let timerId = null;
-        timerId = setInterval(() => {
-          difference = difference - 1000;
-          let x = convertMs(difference);
-          days.textContent = addLeadingZero(x.days);
-          hours.textContent = addLeadingZero(x.hours);
-          minutes.textContent = addLeadingZero(x.minutes);
-          seconds.textContent = addLeadingZero(x.seconds);
-        }, 1000);
+        tick(difference);
       }, 0);
     });
   },
 };
+
+function validateDatetime(selectedDates, options) {
+  if (selectedDates.getTime() < options.defaultDate) {
+    alert('Please choose a date in the future');
+  } else {
+    startBtn.removeAttribute('disabled', 'disabled');
+  }
+}
+
+function tick(difference) {
+  timerId = setInterval(() => {
+    difference = difference - 1000;
+
+    if (difference <= 1000) {
+      clearInterval(timerId);
+    }
+    transformValues(difference);
+  }, 1000);
+}
+
+function transformValues(difference) {
+  const x = convertMs(difference);
+  days.textContent = addLeadingZero(x.days);
+  hours.textContent = addLeadingZero(x.hours);
+  minutes.textContent = addLeadingZero(x.minutes);
+  seconds.textContent = addLeadingZero(x.seconds);
+}
+
 flatpickr(input, options);
